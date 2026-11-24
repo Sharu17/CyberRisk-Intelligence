@@ -56,6 +56,42 @@ def extract_description(cve):
 
     return ""
 
+def validate_data(df):
+    print("\nDATA QUALITY VALIDATION")
+    print("------------------------")
+
+    # 1. Check missing CVE IDs
+    missing_ids = df["cve_id"].isnull().sum()
+    print("Missing CVE IDs:", missing_ids)
+
+    # 2. Check duplicate CVE IDs
+    duplicates = df["cve_id"].duplicated().sum()
+    print("Duplicate CVE IDs:", duplicates)
+
+    # 3. Check invalid CVSS scores
+    invalid_scores = (
+        df["cvss_score"].notnull()
+        & ~df["cvss_score"].between(0, 10)
+    ).sum()
+    print("Invalid CVSS scores:", invalid_scores)
+
+    # 4. Check missing descriptions
+    missing_descriptions = (
+        df["description"].isna()
+        | df["description"].str.strip().eq("")
+    ).sum()
+    print("Missing descriptions:", missing_descriptions)
+
+    # 5. Check missing CVSS scores
+    missing_scores = df["cvss_score"].isnull().sum()
+    print("Missing CVSS scores:", missing_scores)
+
+    # Critical checks
+    if missing_ids > 0 or duplicates > 0 or invalid_scores > 0:
+        raise ValueError("Critical data quality checks failed!")
+
+    print("\nData quality validation passed!")
+
 
 def transform_data():
 
@@ -107,6 +143,7 @@ def transform_data():
     df["cvss_score"] = pd.to_numeric(
         df["cvss_score"], errors="coerce"
     )
+    validate_data(df)
 
     # Save processed data
     OUTPUT_FILE.parent.mkdir(parents=True, exist_ok=True)
@@ -132,3 +169,5 @@ def transform_data():
 
 if __name__ == "__main__":
     transform_data()
+
+
