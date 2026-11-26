@@ -1,4 +1,5 @@
 
+from database.load_data import load_vulnerabilities
 from extraction.nvd_api import fetch_vulnerabilities
 from extraction.cisa_kev import fetch_cisa_kev
 
@@ -36,6 +37,9 @@ def run_pipeline():
         # Step 5: Calculate risk priorities
         print("\nSTEP 5: RISK PRIORITISATION")
         generate_risk_scores()
+
+        print("\nSTEP 6: DATABASE LOADING")
+        load_vulnerabilities()
 
         print("\n================================")
         print("PIPELINE COMPLETED SUCCESSFULLY")
